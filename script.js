@@ -1,52 +1,69 @@
-const API_KEY = 'AIzaSyDREdLnNXJPerFLQEnb1wGgY6w-nQUtjro';
 const SPREADSHEET_ID = '1t72XJ_xk3ckyvb0aBGhlpDPCSmUxi6dGOp7rgXa0yv8';
 const SHEET_NAME = 'Sheet1';
 
-let googleSheetsInitialized = false;
+let tokenClient;
+let gapiInited = false;
+let gisInited = false;
 
-// Initialize Google Sheets API
-async function initializeGoogleSheets() {
-    console.log("Initializing Google Sheets API...");
+// Load the GAPI library
+function gapiLoaded() {
+    gapi.load('client', initializeGapiClient);
+}
+
+// Initialize GAPI client with the Google Sheets API
+async function initializeGapiClient() {
+    console.log("Initializing GAPI client...");
     try {
         await gapi.client.init({
-            apiKey: API_KEY,
             discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
         });
-        googleSheetsInitialized = true;
-        console.log("Google Sheets API initialized successfully.");
+        gapiInited = true;
+        console.log("GAPI client initialized successfully.");
+        maybeEnableButtons();
     } catch (error) {
-        console.error("Error initializing Google Sheets API:", error);
+        console.error("Error initializing GAPI client:", error);
     }
 }
 
-// Load the gapi client and initialize Google Sheets API
-function loadGoogleAPI() {
-    console.log("Loading Google API client...");
-    if (typeof gapi === 'undefined') {
-        console.error("Google API client library not loaded.");
-        setTimeout(loadGoogleAPI, 1000); // Retry loading the library after 1 second
-        return;
-    }
-
-    gapi.load('client', async () => {
-        await initializeGoogleSheets();
+// Load the Google Identity Services (GIS) library
+function gisLoaded() {
+    console.log("Loading GIS client...");
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: '569373168648-45r8nv2rbkbsajirmp3113u2rhpn28ro.apps.googleusercontent.com', // Replace with your OAuth 2.0 Client ID
+        scope: 'https://www.googleapis.com/auth/spreadsheets',
+        callback: '', // Will be set dynamically on auth click
     });
+    gisInited = true;
+    maybeEnableButtons();
 }
 
-// Start Initialization on Page Load
-window.onload = () => {
-    loadGoogleAPI();
-};
-
-// Write Data to Google Sheets
-async function writeSheetData(data) {
-    if (!googleSheetsInitialized) {
-        console.error("Google Sheets API client not loaded. Please wait...");
-        return;
+// Enable buttons once both GAPI and GIS are initialized
+function maybeEnableButtons() {
+    if (gapiInited && gisInited) {
+        document.getElementById('authorize-button').disabled = false;
     }
+}
 
-    console.log("Writing data to Google Sheets:", data);
+// Handle user authentication
+function handleAuthClick() {
+    tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+            throw resp;
+        }
+        console.log("Access token acquired.");
+    };
 
+    if (gapi.client.getToken() === null) {
+        // Request an access token
+        tokenClient.requestAccessToken({ prompt: 'consent' });
+    } else {
+        // Refresh the token silently
+        tokenClient.requestAccessToken({ prompt: '' });
+    }
+}
+
+// Write data to Google Sheets
+async function writeSheetData(data) {
     try {
         const response = await gapi.client.sheets.spreadsheets.values.append({
             spreadsheetId: SPREADSHEET_ID,
@@ -56,8 +73,7 @@ async function writeSheetData(data) {
                 values: [data],
             },
         });
-
-        console.log("Data successfully written to sheet:", response);
+        console.log("Data written successfully:", response);
     } catch (error) {
         console.error("Error writing data to Google Sheets:", error);
     }
