@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Mileage Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Car Mileage Tracker</h1>
+    </header>
+
+    <main>
+        <!-- Mileage Tracking Section -->
+        <section id="mileage-tracking">
+            <h2>Mileage Tracking</h2>
+            <form id="mileage-form">
+                <label for="current-mileage">Current Mileage:</label>
+                <input type="number" id="current-mileage" required>
+                
+                <label for="end-mileage">End Mileage:</label>
+                <input type="number" id="end-mileage" required>
+                
+                <button type="submit">Record Mileage</button>
+            </form>
+            <div id="mileage-output"></div>
+        </section>
+
+        <!-- Odometer Records Section -->
+        <section id="odometer-records">
+            <h2>Odometer Records</h2>
+            <form id="odometer-form">
+                <label for="last-odometer">Last Odometer Reading:</label>
+                <input type="number" id="last-odometer" required>
+                
+                <label for="current-odometer">Current Odometer Reading:</label>
+                <input type="number" id="current-odometer" required>
+                
+                <label for="fuel-amount">Fuel Amount (liters):</label>
+                <input type="number" id="fuel-amount" required>
+                
+                <label for="fuel-price">Fuel Price (total cost):</label>
+                <input type="number" id="fuel-price" required>
+                
+                <button type="submit">Record Odometer</button>
+            </form>
+            <div id="odometer-output"></div>
+        </section>
+
+        <!-- Service Reminders Section -->
+        <section id="service-reminders">
+            <h2>Service Reminders</h2>
+            <form id="service-form">
+                <label for="current-mileage-service">Current Mileage:</label>
+                <input type="number" id="current-mileage-service" readonly>
+                
+                <label for="service-mileage">Next Service Mileage:</label>
+                <input type="number" id="service-mileage" required>
+                
+                <button type="submit">Set Reminder</button>
+            </form>
+            <div id="service-output"></div>
+        </section>
+
+        <!-- Reports Section -->
+        <section id="reports">
+            <h2>Reports</h2>
+            <button id="generate-reports">Generate Reports</button>
+            <div id="reports-output"></div>
+        </section>
+    </main>
+
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
